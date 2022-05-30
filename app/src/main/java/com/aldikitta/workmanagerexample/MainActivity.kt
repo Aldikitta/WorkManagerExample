@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.work.*
 import com.aldikitta.workmanagerexample.databinding.ActivityMainBinding
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -18,7 +19,8 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.button.setOnClickListener {
-            setOneTimeWorkRequest()
+//            setOneTimeWorkRequest()
+            setPeriodicWorkRequest()
         }
     }
 
@@ -58,5 +60,13 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
             }
         })
+    }
+
+    private fun setPeriodicWorkRequest() {
+        val periodicWorkRequest =
+            PeriodicWorkRequest.Builder(DownloadingWorkers::class.java, 16, TimeUnit.MINUTES)
+                .build()
+
+        WorkManager.getInstance(applicationContext).enqueue(periodicWorkRequest)
     }
 }
