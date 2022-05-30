@@ -2,6 +2,9 @@ package com.aldikitta.workmanagerexample
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.lifecycle.Observer
+import androidx.work.Constraints
+import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
 import com.aldikitta.workmanagerexample.databinding.ActivityMainBinding
@@ -18,9 +21,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setOneTimeWorkRequest() {
-        val uploadRequest = OneTimeWorkRequest.Builder(UploadWorker::class.java)
+        val workManager = WorkManager.getInstance(applicationContext)
+        val constraints = Constraints.Builder()
+            .setRequiresCharging(true)
+            .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
-        WorkManager.getInstance(applicationContext)
-            .enqueue(uploadRequest)
+        val uploadRequest = OneTimeWorkRequest.Builder(UploadWorker::class.java)
+            .setConstraints(constraints)
+            .build()
+        WorkManager.getInstance(applicationContext).enqueue(uploadRequest)
+        workManager.getWorkInfoByIdLiveData(uploadRequest.id).observe(this, Observer {
+            binding.textView.text = it.state.name
+        })
     }
 }
